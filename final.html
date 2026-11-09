@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Backdrop Application</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Aesthetic Handwritten Letter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            overflow: hidden;
+            background-color: #1c1c1e;
+        }
+
+        /* Ambient Room Lighting Base */
+        .room-backdrop {
+            /* background: linear-gradient(180deg, #2a2838 0%, #1a1824 60%, #12111a 100%); */
+            background: linear-gradient(180deg, #90a3d6 0%, #4a4971 60%, #2c252c 100%);
+            position: relative;
+        }
+
+        /* Window Light Effect */
+        .window-light {
+            position: absolute;
+            top: 0;
+            right: 15%;
+            width: 300px;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 236, 210, 0.08) 0%, rgba(255, 236, 210, 0) 70%);
+            transform: skewX(-20deg);
+            pointer-events: none;
+        }
+
+        /* Aesthetic Bed CSS Styling */
+        .bed-container {
+            width: 90%;
+            max-width: 720px;
+            height: 420px;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .headboard {
+            width: 92%;
+            height: 140px;
+            background: linear-gradient(180deg, #5c3a21 0%, #3d2413 100%);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.1), 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid #2d1a0e;
+            position: relative;
+        }
+
+        .headboard-cushion {
+            position: absolute;
+            bottom: 10px;
+            left: 5%;
+            width: 90%;
+            height: 90px;
+            background: #2b262d;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .pillows-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 2;
+            margin-top: -65px;
+            width: 80%;
+        }
+
+        .pillow {
+            width: 44%;
+            height: 75px;
+            background: linear-gradient(135deg, #fdfbf7 0%, #e2dfd8 100%);
+            border-radius: 18px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            transform: perspective(300px) rotateX(15deg);
+            position: relative;
+        }
+
+        .pillow::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 70%;
+            border: 1px dashed rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+        }
+
+        .mattress-frame {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(180deg, #eef2f5 0%, #d5dbdf 100%);
+            border-radius: 28px 28px 16px 16px;
+            margin-top: -20px;
+            z-index: 1;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border-bottom: 14px solid #3d2413;
+        }
+
+        .duvet {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 75%;
+            background: linear-gradient(180deg, #4a6fa5 0%, #35527a 100%);
+            border-radius: 24px 24px 10px 10px;
+            box-shadow: inset 0 6px 10px rgba(255, 255, 255, 0.2), 0 -4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .duvet-fold {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 35px;
+            background: #e6ebf0;
+            border-radius: 16px 16px 12px 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .throw-blanket {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 55%;
+            height: 45%;
+            background: #c97a63;
+            border-top-left-radius: 20px;
+            box-shadow: -4px -4px 12px rgba(0, 0, 0, 0.2);
+            transform: rotate(-2deg) scale(1.05);
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                /* 15 slides * 320px width + 15 gaps * 24px gap = 5160px total distance for one set */
+                transform: translateX(calc(-15 * (320px + 24px)));
+            }
+        }
+
+        .slider {
+            background: transparent;
+            height: 380px;
+            margin: auto;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Optional edge gradients for fading look */
+        .slider::before,
+        .slider::after {
+            content: "";
+            height: 100%;
+            position: absolute;
+            width: 100px;
+            z-index: 2;
+            pointer-events: none;
+            top: 0;
+        }
+
+        .slider::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        .slider::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        .slider .slide-track {
+            animation: scroll 40s linear infinite;
+            display: flex;
+            width: calc(2 * 15 * (320px + 24px));
+            gap: 24px;
+        }
+
+        .slider .slide {
+            height: 340px;
+            min-width: 320px;
+            flex-shrink: 0;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slider .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Note: standard CSS property is object-fit: cover */
+        }
+
+        /* Feature 3: Photo Animation States */
+        #photo-stage {
+            position: absolute;
+            top: 50%;
+            left: 37%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+        }
+
+        .photo-card {
+            transition: all 0.6s cubic-bezier(0.34, 1.25, 0.64, 1);
+            width: 800px;
+            height: 450px;
+        }
+
+        /* Photo Stage States */
+        /* State 0: Off-screen bottom */
+        .stage-state-0 {
+            transform: translate(-20%, 120%) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* State 1: Panned up stacked */
+        .stage-state-1 {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .stage-state-1 .back-photo {
+            transform: translate(12px, -12px) rotate(4deg);
+        }
+
+        .stage-state-1 .front-photo {
+            transform: translate(0, 0) rotate(-2deg);
+        }
+
+        /* State 2: Side-by-side (increased split offset for larger cards) */
+        .stage-state-2 {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .stage-state-2 .back-photo {
+            transform: translate(200px, 0px) rotate(3deg);
+        }
+
+        .stage-state-2 .front-photo {
+            transform: translate(-200px, 0px) rotate(-3deg);
+        }
+
+        /* State 3: Fall and disappear */
+        .stage-state-3 {
+            transform: translate(-20%, 120%) rotate(12deg) scale(0.9);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Feature 5: Folding Letter Styles */
+        .letter-container {
+            perspective: 1200px;
+            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+        }
+
+        .letter-container.hidden-letter {
+            transform: translate(-50%, 130%) scale(0.7);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .letter-container.visible-letter {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .paper-fold {
+            background: #fbf8ef;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            transform-origin: top center;
+        }
+
+        .letter-container.folded .top-fold {
+            transform: rotateX(-179deg);
+        }
+
+        .letter-paper {
+            font-family: 'Caveat', cursive;
+            background-image: linear-gradient(#e8e2ce 1px, transparent 1px);
+            background-size: 100% 1.8rem;
+            line-height: 1.8rem;
+        }
+
+        /* Brightness HUD Overlay */
+        #brightness-overlay {
+            pointer-events: none;
+            transition: opacity 0.15s ease;
+            background-color: black;
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen relative overflow-hidden select-none">
+
+    <!-- 1. BACKDROP ROOM & BED -->
+    <div id="backdrop-room" class="room-backdrop w-full h-full absolute inset-0">
+        <div class="window-light"></div>
+
+        <div class="absolute top-12 left-1/2 -translate-x-1/2 flex gap-8">
+            <div
+                class="w-32 h-44 bg-amber-950/40 rounded-lg border-4 border-amber-900/60 shadow-xl overflow-hidden p-2 flex items-center justify-center">
+                <img src="assets/wallart1.jpeg" alt="Wall art 1" class="w-full h-full object-cover rounded" />
+            </div>
+            <div
+                class="w-24 h-36 bg-amber-950/40 rounded-lg border-4 border-amber-900/60 shadow-xl overflow-hidden p-2 flex items-center justify-center">
+                <img src="assets/wallart2.png" alt="Wall art 2" class="w-full h-full object-cover rounded" />
+            </div>
+        </div>
+
+        <!-- Cozily Rendered CSS Bed -->
+        <div class="bed-container">
+            <div class="headboard">
+                <div class="headboard-cushion"></div>
+            </div>
+            <div class="pillows-row">
+                <div class="pillow"></div>
+                <div class="pillow"></div>
+            </div>
+            <div class="mattress-frame">
+                <div class="duvet">
+                    <div class="duvet-fold"></div>
+                </div>
+                <div class="throw-blanket"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BRIGHTNESS OVERLAY (Controlled by D & B keys) -->
+    <div id="brightness-overlay" class="absolute inset-0 z-30"></div>
+
+    <!-- PHOTO SCROLL OVERLAY ('S' Keybind) -->
+    <div id="carousel-overlay"
+        class="fixed inset-0 bg-black/80 backdrop-blur-lg z-40 flex flex-col items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="slider">
+            <div class="slide-track">
+                <!-- SET 1 (Photos 1 to 15) -->
+                <div class="slide"><img src="assets/photoalbum1.jpg" alt="1" /></div>
+                <div class="slide"><img src="assets/photoalbum2.jpg" alt="2" /></div>
+                <div class="slide"><img src="assets/photoalbum3.jpg" alt="3" /></div>
+                <div class="slide"><img src="assets/photoalbum4.jpg" alt="4" /></div>
+                <div class="slide"><img src="assets/photoalbum5.jpg" alt="5" /></div>
+                <div class="slide"><img src="assets/photoalbum6.jpg" alt="6" /></div>
+                <div class="slide"><img src="assets/photoalbum7.jpg" alt="7" /></div>
+                <div class="slide"><img src="assets/photoalbum8.jpg" alt="8" /></div>
+                <div class="slide"><img src="assets/photoalbum9.jpg" alt="9" /></div>
+                <div class="slide"><img src="assets/photoalbum10.jpg" alt="10" /></div>
+                <div class="slide"><img src="assets/photoalbum11.jpg" alt="11" /></div>
+                <div class="slide"><img src="assets/photoalbum12.jpg" alt="12" /></div>
+                <div class="slide"><img src="assets/photoalbum13.jpg" alt="13" /></div>
+                <div class="slide"><img src="assets/photoalbum14.jpg" alt="14" /></div>
+                <div class="slide"><img src="assets/photoalbum15.jpg" alt="15" /></div>
+
+                <!-- SET 2 (Exact Duplicate for Seamless Loop) -->
+                <div class="slide"><img src="assets/photoalbum1.jpg" alt="1" /></div>
+                <div class="slide"><img src="assets/photoalbum2.jpg" alt="2" /></div>
+                <div class="slide"><img src="assets/photoalbum3.jpg" alt="3" /></div>
+                <div class="slide"><img src="assets/photoalbum4.jpg" alt="4" /></div>
+                <div class="slide"><img src="assets/photoalbum5.jpg" alt="5" /></div>
+                <div class="slide"><img src="assets/photoalbum6.jpg" alt="6" /></div>
+                <div class="slide"><img src="assets/photoalbum7.jpg" alt="7" /></div>
+                <div class="slide"><img src="assets/photoalbum8.jpg" alt="8" /></div>
+                <div class="slide"><img src="assets/photoalbum9.jpg" alt="9" /></div>
+                <div class="slide"><img src="assets/photoalbum10.jpg" alt="10" /></div>
+                <div class="slide"><img src="assets/photoalbum11.jpg" alt="11" /></div>
+                <div class="slide"><img src="assets/photoalbum12.jpg" alt="12" /></div>
+                <div class="slide"><img src="assets/photoalbum13.jpg" alt="13" /></div>
+                <div class="slide"><img src="assets/photoalbum14.jpg" alt="14" /></div>
+                <div class="slide"><img src="assets/photoalbum15.jpg" alt="15" /></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. PHOTO ANIMATION STAGE (Triggered by 'P') -->
+    <div id="photo-stage" class="fixed top-1/2 left-1/2 z-30 stage-state-0 w-[420px] h-[520px]">
+        <div class="photo-card back-photo absolute inset-0">
+            <img src="assets/oldphoto2.png" class="w-full h-full object-cover" alt="Dylan">
+        </div>
+
+        <div class="photo-card front-photo absolute inset-0">
+            <img src="assets/oldphoto1.png" class="w-full h-full object-cover" alt="Me and the boys">
+        </div>
+    </div>
+
+    <!-- 5. FOLDING LETTER ANIMATION (Triggered by 'T') -->
+    <div id="letter-stage" class="letter-container hidden-letter folded fixed top-1/2 left-1/2 z-30 w-11/12 max-w-2xl">
+        <div class="relative bg-amber-50 rounded-lg p-6 shadow-2xl border border-amber-200 letter-paper text-gray-800">
+            <div class="flex justify-between items-center mb-4 border-b border-amber-900/20 pb-2">
+                <span class="text-2xl font-bold text-amber-900">Dear Future Norman,</span>
+            </div>
+            <div class="text-xl space-y-3 min-h-[180px]">
+                <p>HAHA, if you’re reading this, you’re probably super old now. Do you have grey hair yet? LOL. Go to
+                    sleep, grandpa.</p>
+                <p>Anyways, I just started high school and honestly, I already hate studying. I hope you’re not still
+                    doing homework when you’re old HAHA. I don’t know what life is like for you now. Maybe it’s super
+                    hard, or maybe you’re rich and famous (PLEASE BE RICH).</p>
+                <p>But if you’re ever sad or having a bad day, I thought of some things you should keep with you!</p>
+                <p>Number 1: Remember that superhero toy you had when you were 3? You were so obsessed with that thing.
+                    I hope you still have it somewhere HAHAHA</p>
+                <p>Number 2: Your friends! Do you still have any friends LOL but
+                    even if you don’t talk anymore, remember all the stupid things you guys did together? Those were
+                    really fun times. Don’t forget them, okay?</p>
+                <p>Number 3: I forgot already... maybe I’ll remember it later. </p>
+                <p>Anyways, I hope you’re doing okay, future me. I think you’re fine lah. Please don’t be a boring adult
+                    pls</p>
+                <p class="text-right mt-6">From, </p>
+                <p class="text-right mt-6">Younger Norman (the cooler version)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR CODE OVERLAY ('Q' Keybind) -->
+    <div id="qr-overlay"
+        class="fixed inset-0 bg-black/80 backdrop-blur-lg z-40 flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div id="qr-card" class="flex flex-col items-center gap-5 transition-transform duration-300 scale-95">
+            <div class="text-center text-white">
+                <p class="text-2xl font-semibold tracking-wide">Four Now Presents:</p>
+                <p class="text-2xl font-semibold tracking-wide">THE THINGS WE BRING WITH US</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-2xl">
+                <img src="assets/qrcode.png" alt="QR Code" class="w-72 h-72 object-contain" />
+            </div>
+            <div class="text-center text-white">
+                <p class="text-2xl font-semibold tracking-wide">Scan the QR code to view the programme booklet!</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        /* -------------------------------------------------------------
+           1. FULLSCREEN TOGGLE
+        ------------------------------------------------------------- */
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const icon = document.getElementById('icon-fullscreen');
+            if (document.fullscreenElement) {
+                icon.setAttribute('data-lucide', 'minimize');
+            } else {
+                icon.setAttribute('data-lucide', 'maximize');
+            }
+            lucide.createIcons();
+        });
+
+        /* -------------------------------------------------------------
+           2. 'S' KEYBIND - PHOTO SCROLL CAROUSEL
+        ------------------------------------------------------------- */
+        let carouselOpen = false;
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 's' || e.key === 'S') {
+                carouselOpen = !carouselOpen;
+                const overlay = document.getElementById('carousel-overlay');
+                if (carouselOpen) {
+                    overlay.classList.remove('opacity-0', 'pointer-events-none');
+                    overlay.classList.add('opacity-100', 'pointer-events-auto');
+                } else {
+                    overlay.classList.remove('opacity-100', 'pointer-events-auto');
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                }
+            }
+        });
+
+        /* -------------------------------------------------------------
+           3. 'P' KEYBIND - 3-STATE PHOTO ANIMATION
+        ------------------------------------------------------------- */
+        let photoState = 0; // 0: Hidden, 1: Panned Up, 2: Side-by-Side, 3: Fall/Reset
+
+        function cyclePhotoState() {
+            const stage = document.getElementById('photo-stage');
+
+            // Increment state
+            photoState = (photoState + 1) % 4;
+
+            // Apply CSS State Classes
+            stage.className = `fixed top-1/2 left-1/2 z-30 w-80 h-96 stage-state-${photoState}`;
+
+            // Auto-reset state 3 back to 0 quietly after animation finishes
+            if (photoState === 3) {
+                setTimeout(() => {
+                    if (photoState === 3) {
+                        photoState = 0;
+                        stage.className = `fixed top-1/2 left-1/2 z-30 w-80 h-96 stage-state-0`;
+                    }
+                }, 600);
+            }
+        }
+
+        /* -------------------------------------------------------------
+           4. 'D' & 'B' KEYBINDS - BRIGHTNESS CONTROL (MAC-STYLE HUD)
+        ------------------------------------------------------------- */
+        let darknessLevel = 0; // 0 (brightest) to 0.85 (darkest)
+        let hudTimeout = null;
+
+        function adjustBrightness(delta) {
+            darknessLevel = Math.max(0, Math.min(0.85, darknessLevel + delta));
+
+            // Update overlay opacity
+            const overlay = document.getElementById('brightness-overlay');
+            overlay.style.opacity = darknessLevel;
+
+            // Update Mac-style HUD OSD
+            const hud = document.getElementById('hud-popup');
+            const hudBar = document.getElementById('hud-bar');
+
+            // Calculate remaining brightness % (100% down to 15%)
+            const brightnessPercent = Math.round((1 - (darknessLevel / 0.85) * 0.85) * 100);
+            hudBar.style.width = `${brightnessPercent}%`;
+
+            // Display HUD
+            hud.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            hud.classList.add('opacity-100', 'scale-100');
+
+            // Hide HUD after 1.5 seconds
+            clearTimeout(hudTimeout);
+            hudTimeout = setTimeout(() => {
+                hud.classList.remove('opacity-100', 'scale-100');
+                hud.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            }, 1500);
+        }
+
+        /* -------------------------------------------------------------
+           5. 'T' KEYBIND - FOLDING LETTER ANIMATION
+        ------------------------------------------------------------- */
+        let letterOpen = false;
+
+        function toggleLetter() {
+            letterOpen = !letterOpen;
+            const letter = document.getElementById('letter-stage');
+
+            if (letterOpen) {
+                letter.classList.remove('hidden-letter');
+                letter.classList.add('visible-letter');
+                // Unfold effect after panned up
+                setTimeout(() => {
+                    letter.classList.remove('folded');
+                }, 300);
+            } else {
+                letter.classList.add('folded');
+                // Slide down after fold
+                setTimeout(() => {
+                    letter.classList.remove('visible-letter');
+                    letter.classList.add('hidden-letter');
+                }, 300);
+            }
+        }
+
+        /* -------------------------------------------------------------
+   'Q' KEYBIND - QR CODE OVERLAY
+------------------------------------------------------------- */
+        let qrOpen = false;
+
+        function toggleQR() {
+            qrOpen = !qrOpen;
+            const overlay = document.getElementById('qr-overlay');
+            const card = document.getElementById('qr-card');
+
+            if (qrOpen) {
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                overlay.classList.add('opacity-100', 'pointer-events-auto');
+                card.classList.replace('scale-95', 'scale-100');
+            } else {
+                overlay.classList.remove('opacity-100', 'pointer-events-auto');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                card.classList.replace('scale-100', 'scale-95');
+            }
+        }
+
+        /* -------------------------------------------------------------
+           GLOBAL KEYBOARD EVENT LISTENERS
+        ------------------------------------------------------------- */
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+
+            // Toggle Fullscreen (F)
+            if (key === 'f') {
+                toggleFullscreen();
+            }
+
+            // Photo Scroll Carousel (S)
+            if (key === 's') {
+                toggleCarousel();
+            }
+
+            // Carousel Arrow Key Navigation
+            if (carouselOpen) {
+                if (e.key === 'ArrowRight') scrollCarousel(1);
+                if (e.key === 'ArrowLeft') scrollCarousel(-1);
+            }
+
+            // Photo Animation 3-State (P)
+            if (key === 'p') {
+                cyclePhotoState();
+            }
+
+            // Darker / Dim Brightness (D)
+            if (key === 'd') {
+                adjustBrightness(0.1); // Increase darkness
+            }
+
+            // Brighter (B)
+            if (key === 'b') {
+                adjustBrightness(-0.1); // Decrease darkness
+            }
+
+            // Letter Toggle (T)
+            if (key === 't') {
+                toggleLetter();
+            }
+
+            // QR Code (Q)
+            if (key === 'q') {
+                toggleQR();
+            }
+
+        });
+    </script>
+</body>
+
+</html>
