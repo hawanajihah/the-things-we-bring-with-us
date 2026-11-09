@@ -1,8 +1,8 @@
 # THE THINGS WE BRING WITH US
 
-Instead of being boring and using Powerpoint, I made an interactive backdrop application. 
+Instead of being boring and using Powerpoint, I made an interactive backdrop application. For the sake of convenience, I only used keybinds to access each feature.
 
-### Features to be implemented
+### Implemented Features
 
 1. When the website is open, it shows a backdrop of a bedroom with a few posters. 
 2. Toggling the keybind F allows me to toggle in and out of full screen mode. 
