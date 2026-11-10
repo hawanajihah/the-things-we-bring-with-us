@@ -463,6 +463,18 @@
         </div>
     </div>
 
+    <!-- SPECIAL THANKS OVERLAY ('C' Keybind) -->
+    <div id="thanks-overlay"
+        class="fixed inset-0 bg-black/80 backdrop-blur-lg z-40 flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div id="thanks-card"
+            class="max-w-2xl w-11/12 text-center text-white flex flex-col items-center gap-5 transition-transform duration-300 scale-95">
+            <p class="text-3xl font-semibold tracking-wide">Special thanks to:</p>
+            <p class="text-lg leading-relaxed font-light">
+                Replace this with your own block of text. You can write as much as you like here,
+                and it will wrap automatically. Thank everyone who helped make this possible.
+            </p>
+        </div>
+    </div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
@@ -619,6 +631,27 @@
         }
 
         /* -------------------------------------------------------------
+       'C' KEYBIND - SPECIAL THANKS OVERLAY
+        ------------------------------------------------------------- */
+        let thanksOpen = false;
+        
+        function toggleThanks() {
+            thanksOpen = !thanksOpen;
+            const overlay = document.getElementById('thanks-overlay');
+            const card = document.getElementById('thanks-card');
+        
+            if (thanksOpen) {
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                overlay.classList.add('opacity-100', 'pointer-events-auto');
+                card.classList.replace('scale-95', 'scale-100');
+            } else {
+                overlay.classList.remove('opacity-100', 'pointer-events-auto');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                card.classList.replace('scale-100', 'scale-95');
+            }
+        }
+
+        /* -------------------------------------------------------------
            GLOBAL KEYBOARD EVENT LISTENERS
         ------------------------------------------------------------- */
         window.addEventListener('keydown', (e) => {
@@ -663,6 +696,11 @@
             // QR Code (Q)
             if (key === 'q') {
                 toggleQR();
+            }
+
+            // Special Thanks (C)
+            if (key === 'c') {
+                toggleThanks();
             }
 
         });
